@@ -1,9 +1,7 @@
 import config from 'config';
 import supertest from 'supertest';
-import clearDbFactory from 'mocha-mongoose';
+import { clearDb } from './testUtils';
 import app from 'app';
-
-const clearDb = clearDbFactory(config.get('mongodb'));
 
 async function createAgentAndUser(username, password) {
 	const agent = supertest(app);

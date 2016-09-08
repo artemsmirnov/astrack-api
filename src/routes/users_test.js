@@ -1,11 +1,10 @@
 import config from 'config';
 import supertest from 'supertest';
-import clearDbFactory from 'mocha-mongoose';
+import { clearDb } from './testUtils';
 import app from 'app';
 
-const clearDb = clearDbFactory(config.get('mongodb'));
-
 beforeEach(clearDb);
+
 describe('/users', function () {
 	describe('POST /signup', function () {
 		it('should create user and return it', async function () {
