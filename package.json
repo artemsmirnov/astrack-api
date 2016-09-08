@@ -1,0 +1,48 @@
+{
+  "name": "astrack",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "babel-plugin-module-resolver": "^2.2.0",
+    "babel-plugin-transform-async-to-module-method": "^6.8.0",
+    "babel-plugin-transform-es2015-destructuring": "^6.9.0",
+    "babel-plugin-transform-export-extensions": "^6.8.0",
+    "babel-plugin-transform-function-bind": "^6.8.0",
+    "babel-plugin-transform-object-rest-spread": "^6.8.0",
+    "babel-plugin-transform-promise-to-bluebird": "^1.1.0",
+    "babel-preset-es2015-node": "^6.1.1",
+    "babel-register": "^6.14.0",
+    "bcryptjs": "^2.3.0",
+    "bluebird": "^3.4.1",
+    "body-parser": "^1.15.2",
+    "config": "^1.21.0",
+    "express": "^4.14.0",
+    "express-session": "^1.14.0",
+    "express-validation": "github:artemsmirnov/express-validation",
+    "joi": "^9.0.4",
+    "lodash": "^4.14.2",
+    "mocha-mongoose": "^1.2.0",
+    "mongoose": "^4.5.8",
+    "winston": "^2.2.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "bootprint": "^0.8.5",
+    "bootprint-openapi": "^0.17.0",
+    "mocha": "^3.0.2",
+    "nodemon": "^1.10.0",
+    "should": "^11.1.0",
+    "should-sinon": "0.0.5",
+    "sinon": "^1.17.5",
+    "supertest": "^2.0.0"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test mocha --opts mocha.opts src/**/*_test.js",
+    "build": "babel src -d dist",
+    "start": "node -r babel-register src/server.js",
+    "doc": "bootprint openapi doc.yml doc"
+  },
+  "author": "",
+  "license": "ISC"
+}

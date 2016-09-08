@@ -1,0 +1,4 @@
+{
+    "mongodb": "mongodb://localhost/astrack-test",
+    "port": 3400
+}

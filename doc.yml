@@ -1,0 +1,201 @@
+swagger: '2.0'
+schemes:
+    - http
+    - https
+basePath: /api
+info:
+    title: 'astrack api'
+    version: 1.0.0
+tags:
+  - name: user
+    description: User operations
+  - name: track
+    description: Track management
+
+paths:
+    /users/singup:
+        post:
+            tags: [user]
+            summary: Create new user
+            operationId: userSignUp
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: body
+                name: body
+                required: true
+                schema:
+                    $ref: '#/definitions/InputUser'
+            responses:
+                '201':
+                    description: 'Created'
+                    schema:
+                        type: object
+                        properties:
+                            user:
+                                $ref: '#/definitions/User'
+                '400':
+                    description: 'Invalid input'
+                '422':
+                    description: 'User exists'
+    /users/signin:
+        post:
+            tags: [user]
+            summary: Create new session user
+            operationId: userSignIn
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: body
+                name: body
+                required: true
+                schema:
+                    $ref: '#/definitions/InputUser'
+            responses:
+                '201':
+                    description: 'Created'
+                    schema:
+                        type: object
+                        properties:
+                            user:
+                                $ref: '#/definitions/User'
+                '404':
+                    description: 'User not found'
+    /users/signout:
+        post:
+            tags: [user]
+            summary: Sign out user
+            operationId: userSignOut
+            produces: [application/json]
+            responses:
+                '200':
+                    description: 'Signed out'
+                '403':
+                    description: 'Not signed in'
+    /users/me:
+        get:
+            tags: [user]
+            summary: Get current user
+            operationId: userGetMe
+            produces: [application/json]
+            responses:
+                '200':
+                    schema:
+                        type: object
+                        properties:
+                            user:
+                                $ref: '#/definitions/User'
+
+    /tracks/track:
+        post:
+            tags: [track]
+            summary: Track activity
+            operationId: trackNew
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: body
+                name: body
+                required: true
+                schema:
+                    type: object
+                    required: [activity, date, duration]
+                    properties:
+                        activity:
+                            type: string
+                        date:
+                            type: number
+                        duration:
+                            type: number
+            responses:
+                '200':
+                    schema:
+                        type: object
+                        properties:
+                            track:
+                                $ref: '#/definitions/Track'
+                '400':
+                    description: 'Invalid track'
+    /tracks/{trackId}:
+        delete:
+            tags: [track]
+            summary: Delete track
+            operationId: trackDelete
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: path
+                name: trackId
+                type: string
+            responses:
+                '200':
+                    description: 'Deleted'
+    /tracks/{trackId}/{trackLogId}:
+        delete:
+            tags: [track]
+            summary: Delete track log
+            operationId: trackLogDelete
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: path
+                name: trackId
+                type: string
+              - in: path
+                name: trackLogId
+                type: string
+            responses:
+                '200':
+                    schema:
+                        type: object
+                        properties:
+                            track:
+                                $ref: '#/definitions/Track'
+    /tracks:
+        get:
+            tags: [track]
+            summary: Get tracks
+            operationId: tracksGet
+            produces: [application/json]
+            responses:
+                '200':
+                    schema:
+                        type: object
+                        properties:
+                            tracks:
+                                type: array
+                                items:
+                                    $ref: '#/definitions/Track'
+
+definitions:
+    InputUser:
+        type: object
+        required: [username, password]
+        properties:
+            username:
+                type: string
+            password:
+                type: string
+    User:
+        type: object
+        properties:
+            username:
+                type: string
+    Track:
+        type: object
+        properties:
+            _id:
+                type: string
+            activity:
+                type: string
+            logs:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        _id:
+                            type: string
+                        date:
+                            type: number
+                        duration:
+                            type: number
