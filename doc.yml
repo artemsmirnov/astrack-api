@@ -1,6 +1,5 @@
 swagger: '2.0'
 schemes:
-    - http
     - https
 basePath: /api
 info:
@@ -9,8 +8,8 @@ info:
 tags:
   - name: user
     description: User operations
-  - name: track
-    description: Track management
+  - name: activity
+    description: Activity management
 
 paths:
     /users/singup:
@@ -23,9 +22,14 @@ paths:
             parameters:
               - in: body
                 name: body
-                required: true
                 schema:
-                    $ref: '#/definitions/InputUser'
+                    type: object
+                    required: [username, password]
+                    properties:
+                        username:
+                            type: string
+                        password:
+                            type: string
             responses:
                 '201':
                     description: 'Created'
@@ -48,9 +52,14 @@ paths:
             parameters:
               - in: body
                 name: body
-                required: true
                 schema:
-                    $ref: '#/definitions/InputUser'
+                    type: object
+                    required: [username, password]
+                    properties:
+                        username:
+                            type: string
+                        password:
+                            type: string
             responses:
                 '201':
                     description: 'Created'
@@ -86,76 +95,11 @@ paths:
                             user:
                                 $ref: '#/definitions/User'
 
-    /tracks/track:
-        post:
-            tags: [track]
-            summary: Track activity
-            operationId: trackNew
-            consumes: [application/json]
-            produces: [application/json]
-            parameters:
-              - in: body
-                name: body
-                required: true
-                schema:
-                    type: object
-                    required: [activity, date, duration]
-                    properties:
-                        activity:
-                            type: string
-                        date:
-                            type: number
-                        duration:
-                            type: number
-            responses:
-                '200':
-                    schema:
-                        type: object
-                        properties:
-                            track:
-                                $ref: '#/definitions/Track'
-                '400':
-                    description: 'Invalid track'
-    /tracks/{trackId}:
-        delete:
-            tags: [track]
-            summary: Delete track
-            operationId: trackDelete
-            consumes: [application/json]
-            produces: [application/json]
-            parameters:
-              - in: path
-                name: trackId
-                type: string
-            responses:
-                '200':
-                    description: 'Deleted'
-    /tracks/{trackId}/{trackLogId}:
-        delete:
-            tags: [track]
-            summary: Delete track log
-            operationId: trackLogDelete
-            consumes: [application/json]
-            produces: [application/json]
-            parameters:
-              - in: path
-                name: trackId
-                type: string
-              - in: path
-                name: trackLogId
-                type: string
-            responses:
-                '200':
-                    schema:
-                        type: object
-                        properties:
-                            track:
-                                $ref: '#/definitions/Track'
-    /tracks:
+    /activities:
         get:
-            tags: [track]
-            summary: Get tracks
-            operationId: tracksGet
+            tags: [activity]
+            summary: Get activities
+            operationId: activityIndex
             produces: [application/json]
             responses:
                 '200':
@@ -165,35 +109,110 @@ paths:
                             tracks:
                                 type: array
                                 items:
-                                    $ref: '#/definitions/Track'
+                                    $ref: '#/definitions/Activity'
+        post:
+            tags: [activity]
+            summary: Create activity
+            operationId: activityNew
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: body
+                name: body
+                required: true
+                schema:
+                    type: object
+                    required: [activity]
+                    properties:
+                        name:
+                            type: string
+            responses:
+                '200':
+                    schema:
+                        type: object
+                        properties:
+                            activity:
+                                $ref: '#/definitions/Activity'
+                '400':
+                    description: 'Invalid activity'
+
+    /activities/{activityId}:
+        delete:
+            tags: [activity]
+            summary: Delete activity
+            operationId: activityDelete
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: path
+                name: activityId
+                type: number
+            responses:
+                '200':
+                    description: 'Deleted'
+
+    /activities/{activityId}/logs:
+        post:
+            tags: [activity]
+            summary: Create activity log
+            operationId: activityLogNew
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: path
+                name: activityId
+                type: number
+              - in: body
+                name: body
+                required: true
+                schema:
+                    type: object
+                    required: [date, duration]
+                    properties:
+                        date:
+                            type: number
+                        duration:
+                            type: number
+
+    /activities/{activityId}/logs/{logId}:
+        delete:
+            tags: [activity]
+            summary: Delete activity log
+            operationId: activityLogDelete
+            consumes: [application/json]
+            produces: [application/json]
+            parameters:
+              - in: path
+                name: activityId
+                type: number
+              - in: path
+                name: logId
+                type: number
+            responses:
+                '200':
+                    description: 'Deleted'
 
 definitions:
-    InputUser:
-        type: object
-        required: [username, password]
-        properties:
-            username:
-                type: string
-            password:
-                type: string
     User:
         type: object
         properties:
             username:
                 type: string
-    Track:
+    Activity:
         type: object
         properties:
-            _id:
-                type: string
-            activity:
+            id:
+                type: number
+            name:
                 type: string
             logs:
                 type: array
                 items:
                     type: object
                     properties:
-                        _id:
+                        id:
+                            type: string
+                        summary:
                             type: string
                         date:
                             type: number
