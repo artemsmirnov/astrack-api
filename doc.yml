@@ -1,7 +1,12 @@
 swagger: '2.0'
 schemes:
     - https
+host: localhost
 basePath: /api
+
+consumes: [application/json]
+produces: [application/json]
+
 info:
     title: 'astrack api'
     version: 1.0.0
@@ -15,10 +20,8 @@ paths:
     /users/singup:
         post:
             tags: [user]
-            summary: Create new user
+            summary: Sign up
             operationId: userSignUp
-            consumes: [application/json]
-            produces: [application/json]
             parameters:
               - in: body
                 name: body
@@ -30,6 +33,9 @@ paths:
                             type: string
                         password:
                             type: string
+                    example:
+                        username: fubar
+                        password: catKeyboard
             responses:
                 '201':
                     description: 'Created'
@@ -38,17 +44,24 @@ paths:
                         properties:
                             user:
                                 $ref: '#/definitions/User'
+                    examples:
+                        application/json:
+                            user:
+                                username: fubar
                 '400':
-                    description: 'Invalid input'
+                    $ref: '#/responses/InvalidInput'
                 '422':
-                    description: 'User exists'
+                    description: 'Username is taken'
+                    schema:
+                        $ref: '#/definitions/GenericError'
+                    examples:
+                        application/json:
+                            error: username_is_taken
     /users/signin:
         post:
             tags: [user]
-            summary: Create new session user
+            summary: Sign in
             operationId: userSignIn
-            consumes: [application/json]
-            produces: [application/json]
             parameters:
               - in: body
                 name: body
@@ -61,32 +74,43 @@ paths:
                         password:
                             type: string
             responses:
-                '201':
-                    description: 'Created'
+                '200':
+                    description: 'Signed in'
                     schema:
                         type: object
                         properties:
                             user:
                                 $ref: '#/definitions/User'
+                    examples:
+                        application/json:
+                            user:
+                                username: fubar
                 '404':
-                    description: 'User not found'
+                    $ref: '#/responses/NotFound'
     /users/signout:
         post:
             tags: [user]
-            summary: Sign out user
+            summary: Sign out
             operationId: userSignOut
-            produces: [application/json]
             responses:
                 '200':
                     description: 'Signed out'
+                    examples:
+                        application/json:
+
                 '403':
                     description: 'Not signed in'
+                    schema:
+                        $ref: '#/definitions/GenericError'
+                    examples:
+                        application/json:
+                            error: not_signed_in
+
     /users/me:
         get:
             tags: [user]
             summary: Get current user
             operationId: userGetMe
-            produces: [application/json]
             responses:
                 '200':
                     schema:
@@ -94,13 +118,16 @@ paths:
                         properties:
                             user:
                                 $ref: '#/definitions/User'
+                    examples:
+                        application/json:
+                            user:
+                                username: fubar
 
     /activities:
         get:
             tags: [activity]
             summary: Get activities
             operationId: activityIndex
-            produces: [application/json]
             responses:
                 '200':
                     schema:
@@ -114,8 +141,6 @@ paths:
             tags: [activity]
             summary: Create activity
             operationId: activityNew
-            consumes: [application/json]
-            produces: [application/json]
             parameters:
               - in: body
                 name: body
@@ -141,8 +166,6 @@ paths:
             tags: [activity]
             summary: Delete activity
             operationId: activityDelete
-            consumes: [application/json]
-            produces: [application/json]
             parameters:
               - in: path
                 name: activityId
@@ -156,8 +179,6 @@ paths:
             tags: [activity]
             summary: Create activity log
             operationId: activityLogNew
-            consumes: [application/json]
-            produces: [application/json]
             parameters:
               - in: path
                 name: activityId
@@ -179,8 +200,6 @@ paths:
             tags: [activity]
             summary: Delete activity log
             operationId: activityLogDelete
-            consumes: [application/json]
-            produces: [application/json]
             parameters:
               - in: path
                 name: activityId
@@ -191,6 +210,25 @@ paths:
             responses:
                 '200':
                     description: 'Deleted'
+
+responses:
+    NotFound:
+        description: Entity not found
+        schema:
+            $ref: '#/definitions/GenericError'
+        examples:
+            application/json:
+                error: not_found
+    InvalidInput:
+        description: Invalid input for operation
+        schema:
+            $ref: '#/definitions/InvalidInputError'
+        examples:
+            application/json:
+                error: invalid_input
+                paths:
+                  - path: username
+                    constraint: cannot_be_empty
 
 definitions:
     User:
@@ -218,3 +256,22 @@ definitions:
                             type: number
                         duration:
                             type: number
+    GenericError:
+        type: object
+        properties:
+            error:
+                type: string
+    InvalidInputError:
+        type: object
+        properties:
+            error:
+                type: string
+            paths:
+                type: array
+                items:
+                    type: object
+                    properties:
+                        path:
+                            type: string
+                        constraint:
+                            type: string
