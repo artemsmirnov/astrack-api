@@ -72,7 +72,10 @@ paths:
                         username:
                             type: string
                         password:
-                            type: string
+                            type: string                
+                    example:
+                        username: fubar
+                        password: catKeyboard
             responses:
                 '200':
                     description: 'Signed in'
@@ -97,14 +100,6 @@ paths:
                     description: 'Signed out'
                     examples:
                         application/json:
-
-                '403':
-                    description: 'Not signed in'
-                    schema:
-                        $ref: '#/definitions/GenericError'
-                    examples:
-                        application/json:
-                            error: not_signed_in
 
     /users/me:
         get:
@@ -133,10 +128,23 @@ paths:
                     schema:
                         type: object
                         properties:
-                            tracks:
+                            activities:
                                 type: array
                                 items:
                                     $ref: '#/definitions/Activity'
+                    examples:
+                        application/json:
+                            activities:
+                              - id: 1
+                                name: 'PR-1'
+                                logs:
+                                  - id: 1
+                                    date: 1200
+                                    duration: 500
+                                    summary: 'Nothing'
+                                  - id: 2
+                                    date: 2000
+                                    duration: 300
         post:
             tags: [activity]
             summary: Create activity
@@ -151,6 +159,8 @@ paths:
                     properties:
                         name:
                             type: string
+                    example:
+                        name: 'PR-1'
             responses:
                 '200':
                     schema:
@@ -158,8 +168,14 @@ paths:
                         properties:
                             activity:
                                 $ref: '#/definitions/Activity'
+                    examples:
+                        application/json:
+                            activity:
+                                id: 1
+                                name: 'PR-1'
+                                logs: []
                 '400':
-                    description: 'Invalid activity'
+                    $ref: '#/responses/InvalidInput'
 
     /activities/{activityId}:
         delete:
@@ -190,10 +206,35 @@ paths:
                     type: object
                     required: [date, duration]
                     properties:
+                        summary:
+                            type: string
                         date:
                             type: number
                         duration:
                             type: number
+                    example:
+                        summary: 'Some work'
+                        date: 1000
+                        duration: 500
+            responses:
+                '200':
+                    description: 'Logged'
+                    schema:
+                        type: object
+                        properties:
+                            activity:
+                                $ref: '#/definitions/Activity'
+                    examples:
+                        application/json:
+                            activity:
+                                id: 1
+                                name: 'PR-1'
+                                logs:
+                                  - id: 1
+                                    summary: 'Some work'
+                                    date: 1000
+                                    duration: 500
+
 
     /activities/{activityId}/logs/{logId}:
         delete:
@@ -227,7 +268,7 @@ responses:
             application/json:
                 error: invalid_input
                 paths:
-                  - path: username
+                  - path: somePath
                     constraint: cannot_be_empty
 
 definitions:
@@ -249,7 +290,7 @@ definitions:
                     type: object
                     properties:
                         id:
-                            type: string
+                            type: number
                         summary:
                             type: string
                         date:
