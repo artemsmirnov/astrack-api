@@ -1,8 +1,9 @@
 import config from 'config';
 import supertest from 'supertest';
-import { clearDb } from './testUtils';
+import { clear as clearDb } from 'db';
 import app from 'app';
 
+before(app.resolveWhenReady);
 beforeEach(clearDb);
 
 describe('/users', function () {
@@ -17,26 +18,8 @@ describe('/users', function () {
 				});
 
 			createUserResponse.statusCode.should.be.equal(201);
-			createUserResponse.body.should.be.eql({
-				user: {
-					username: 'test'
-				}
-			});
-		});
-
-		it('should create session on signup', async function () {
-			const agent = supertest(app);
-			
-			await agent.post('/api/users/signup')
-				.send({
-					username: 'test',
-					password: '12345678'
-				});
-
-			const getMeResponse = await agent.get('/api/users/me');
-
-			getMeResponse.statusCode.should.be.equal(200);
-			getMeResponse.body.should.be.eql({
+			createUserResponse.body.should.have.property('accessToken');
+			createUserResponse.body.should.containEql({
 				user: {
 					username: 'test'
 				}
@@ -57,14 +40,10 @@ describe('/users', function () {
 					username: 'test',
 					password: 'gw45g4v5v05'
 				});
-			
+
 			createCollisionUserResponse.statusCode.should.be.equal(422);
 			createCollisionUserResponse.body.should.be.eql({
-				errors: [
-					{
-						message: 'username_is_taken'
-					}
-				]
+				error: 'username_is_taken'
 			});
 		});
 
@@ -78,12 +57,13 @@ describe('/users', function () {
 				});
 
 			createUserShortPasswordResponse.statusCode.should.be.equal(400);
-			createUserShortPasswordResponse.body.should.be.equal({
-				errors: [
-					{
-						message: 'invalid_password'
+			createUserShortPasswordResponse.body.should.be.eql({
+				error: 'invalid_input',
+				paths: {
+					password: {
+						regex: '^.{6}$'
 					}
-				]
+				}
 			});
 
 			const createUserWithoutUserNameResponse = await agent.post('/api/users/signup')
@@ -92,12 +72,13 @@ describe('/users', function () {
 				});
 
 			createUserWithoutUserNameResponse.statusCode.should.be.equal(400);
-			createUserWithoutUserNameResponse.body.should.be.equal({
-				errors: [
-					{
-						message: 'invalid_username'
+			createUserWithoutUserNameResponse.body.should.be.eql({
+				error: 'invalid_input',
+				paths: {
+					username: {
+						cannotBeEmpty: true
 					}
-				]
+				}
 			});
 
 			const createUserEmptyStringUsernameResponse = await agent.post('/api/users/signup')
@@ -108,11 +89,11 @@ describe('/users', function () {
 
 			createUserEmptyStringUsernameResponse.statusCode.should.be.equal(400);
 			createUserEmptyStringUsernameResponse.body.should.be.equal({
-				errors: [
-					{
-						message: 'invalid_username'
+				error: {
+					username: {
+						regex: '^\w{5,255}$'
 					}
-				]
+				}
 			});
 
 			const createUserInvalidCharactersInUsernameResponse = await agent.post('/api/users/signup')
@@ -123,11 +104,11 @@ describe('/users', function () {
 
 			createUserInvalidCharactersInUsernameResponse.statusCode.should.be.equal(400);
 			createUserInvalidCharactersInUsernameResponse.body.should.be.equal({
-				errors: [
-					{
-						message: 'invalid_username'
+				error: {
+					username: {
+						regex: '^\w{5,255}$'
 					}
-				]
+				}
 			});
 		});
 	});
@@ -153,7 +134,8 @@ describe('/users', function () {
 				});
 
 			signInResponse.statusCode.should.be.equal(200);
-			signInResponse.body.should.be.eql({
+			signInResponse.body.should.have.property('accessToken');
+			signInResponse.body.should.containEql({
 				user: {
 					username: 'test'
 				}
@@ -171,11 +153,7 @@ describe('/users', function () {
 
 			signInResponse.statusCode.should.be.equal(400);
 			signInResponse.body.should.be.eql({
-				errors: [
-					{
-						message: 'user_not_found'
-					}
-				]
+				error: 'user_not_found'
 			});
 		});
 
@@ -189,11 +167,7 @@ describe('/users', function () {
 
 			signInResponse.statusCode.should.be.equal(400);
 			signInResponse.body.should.be.eql({
-				errors: [
-					{
-						message: 'user_not_found'
-					}
-				]
+				error: 'user_not_found'
 			});
 		});
 
@@ -208,11 +182,7 @@ describe('/users', function () {
 
 			signInResponse.statusCode.should.be.equal(400);
 			signInResponse.body.should.be.eql({
-				errors: [
-					{
-						message: 'user_not_found'
-					}
-				]
+				error: 'user_not_found'
 			});
 		});
 	});
@@ -231,13 +201,14 @@ describe('/users', function () {
 		it('should sign out if user signed in', async function() {
 			const agent = supertest(app);
 
-			await agent.post('/api/users/signin')
+			const signInResponse = await agent.post('/api/users/signin')
 				.send({
 					username: 'test',
 					password: '123123123'
 				});
 
-			const signOutResponse = await agent.post('/api/users/signout');
+			const signOutResponse = await agent.post('/api/users/signout')
+				.set('Access-Token', signInResponse.body.accessToken);
 
 			signOutResponse.statusCode.should.be.equal(200);
 		});
@@ -248,6 +219,9 @@ describe('/users', function () {
 			const signOutResponse = await agent.post('/api/users/signout');
 
 			signOutResponse.statusCode.should.be.equal(403);
+			signOutResponse.body.should.be.eql({
+				error: 'access_denied'
+			});
 		});
 	});
 
@@ -265,13 +239,14 @@ describe('/users', function () {
 		it('should return user when client is logged in', async function () {
 			const agent = supertest(app);
 
-			await agent.post('/api/users/signin')
+			const signInResponse = await agent.post('/api/users/signin')
 				.send({
 					username: 'test',
 					password: '123123123'
 				});
 
-			const getMeResponse = await agent.get('/api/users/me');
+			const getMeResponse = await agent.get('/api/users/me')
+				.set('Access-Token', signInResponse.body.accessToken);
 
 			getMeResponse.statusCode.should.be.equal(200);
 			getMeResponse.body.should.be.eql({
@@ -286,9 +261,9 @@ describe('/users', function () {
 
 			const getMeResponse = await agent.get('/api/users/me');
 
-			getMeResponse.statusCode.should.be.equal(200);
+			getMeResponse.statusCode.should.be.equal(403);
 			getMeResponse.body.should.be.eql({
-				user: null
+				error: 'access_denied'
 			});
 		});
 	});

@@ -1,4 +1,5 @@
 import Sequelize from 'sequelize';
+import bcrypt from 'bcrypt-as-promised';
 
 const db = new Sequelize('astrack', 'postgres', '', {
 	host: 'localhost',
@@ -15,12 +16,35 @@ export default db;
 
 export const User = db.define('user', {
 	username: {
-		type: Sequelize.STRING,
-		primaryKey: true
+		type: 'citext',
+		primaryKey: true,
+		allowNull: false
 	},
 	hash: Sequelize.STRING
 }, {
-	timestamps: false
+	timestamps: false,
+	instanceMethods: {
+		async setPassword(password) {
+			this.set('hash', await bcrypt.hash(password, 8));
+		},
+		async verifyPassword(password) {
+			try {
+				await bcrypt.compare(password, this.hash);
+				return true;
+			} catch (err) {
+				if (err instanceof bcrypt.MISMATCH_ERROR) {
+					return false
+				}
+				throw err;
+			}
+		},
+		toJSON() {
+			const values = this.get({plain: true});
+
+			delete values.hash;
+			return values;
+		}
+	}
 });
 
 export const Activity = db.define('activity', {
@@ -28,6 +52,8 @@ export const Activity = db.define('activity', {
 }, {
 	timestamps: false
 });
+
+Activity.belongsTo(User);
 
 export const Log = db.define('log', {
 	summary: Sequelize.STRING,
@@ -37,11 +63,14 @@ export const Log = db.define('log', {
 	timestamps: false
 });
 
-Activity.belongsTo(User);
 Log.belongsTo(Activity);
 
+export function clear() {
+	return db.sync({force: true});
+}
+
 // Check connection
-db.authenticate()
+export const ready = db.authenticate()
 	.then(function() {
  		console.log('Connection has been established successfully.');
 

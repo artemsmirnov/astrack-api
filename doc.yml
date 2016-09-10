@@ -16,6 +16,12 @@ tags:
   - name: activity
     description: Activity management
 
+securityDefinitions:
+    accessToken:
+        type: apiKey
+        name: Access-Token
+        in: header
+
 paths:
     /users/singup:
         post:
@@ -42,10 +48,13 @@ paths:
                     schema:
                         type: object
                         properties:
+                            accessToken:
+                                type: string
                             user:
                                 $ref: '#/definitions/User'
                     examples:
                         application/json:
+                            accessToken: 9ud2h8u4h082hc2u8hd082h48248hc084h
                             user:
                                 username: fubar
                 '400':
@@ -82,10 +91,13 @@ paths:
                     schema:
                         type: object
                         properties:
+                            accessToken:
+                                type: string
                             user:
                                 $ref: '#/definitions/User'
                     examples:
                         application/json:
+                            accessToken: 20h0y29f94fy9f2394fy23gf49423
                             user:
                                 username: fubar
                 '404':
@@ -95,6 +107,8 @@ paths:
             tags: [user]
             summary: Sign out
             operationId: userSignOut
+            security:
+              - accessToken: []
             responses:
                 '200':
                     description: 'Signed out'
@@ -106,6 +120,8 @@ paths:
             tags: [user]
             summary: Get current user
             operationId: userGetMe
+            security:
+              - accessToken: []
             responses:
                 '200':
                     schema:
@@ -123,6 +139,8 @@ paths:
             tags: [activity]
             summary: Get activities
             operationId: activityIndex
+            security:
+              - accessToken: []
             responses:
                 '200':
                     schema:
@@ -149,6 +167,8 @@ paths:
             tags: [activity]
             summary: Create activity
             operationId: activityNew
+            security:
+              - accessToken: []
             parameters:
               - in: body
                 name: body
@@ -182,6 +202,8 @@ paths:
             tags: [activity]
             summary: Delete activity
             operationId: activityDelete
+            security:
+              - accessToken: []
             parameters:
               - in: path
                 name: activityId
@@ -195,6 +217,8 @@ paths:
             tags: [activity]
             summary: Create activity log
             operationId: activityLogNew
+            security:
+              - accessToken: []
             parameters:
               - in: path
                 name: activityId
@@ -241,6 +265,8 @@ paths:
             tags: [activity]
             summary: Delete activity log
             operationId: activityLogDelete
+            security:
+              - accessToken: []
             parameters:
               - in: path
                 name: activityId
@@ -268,8 +294,8 @@ responses:
             application/json:
                 error: invalid_input
                 paths:
-                  - path: somePath
-                    constraint: cannot_be_empty
+                    somePath:
+                        cannotBeEmpty: true
 
 definitions:
     User:
@@ -308,11 +334,4 @@ definitions:
             error:
                 type: string
             paths:
-                type: array
-                items:
-                    type: object
-                    properties:
-                        path:
-                            type: string
-                        constraint:
-                            type: string
+                type: object

@@ -1,4 +1,7 @@
 {
     "mongodb": "mongodb://localhost/astrack",
-    "port": 3400
+    "port": 3400,
+    "jwt": {
+    	"secret": "iuh48yq3ycg0duh03uch048h034c031c"
+    }
 }
