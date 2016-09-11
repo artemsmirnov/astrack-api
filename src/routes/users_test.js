@@ -57,12 +57,13 @@ describe('/users', function () {
 				});
 
 			createUserShortPasswordResponse.statusCode.should.be.equal(400);
-			createUserShortPasswordResponse.body.should.be.eql({
-				error: 'invalid_input',
-				paths: {
-					password: {
-						regex: '^.{6}$'
-					}
+			createUserShortPasswordResponse.body.error.should.be.equal('invalid_input');
+			createUserShortPasswordResponse.body.errors[0].should.containEql({
+				dataPath: '.password',
+				keyword: 'minLength',
+				message: 'should NOT be shorter than 6 characters',
+				params: {
+					limit: 6
 				}
 			});
 
@@ -72,12 +73,12 @@ describe('/users', function () {
 				});
 
 			createUserWithoutUserNameResponse.statusCode.should.be.equal(400);
-			createUserWithoutUserNameResponse.body.should.be.eql({
-				error: 'invalid_input',
-				paths: {
-					username: {
-						cannotBeEmpty: true
-					}
+			createUserWithoutUserNameResponse.body.error.should.be.equal('invalid_input');
+			createUserWithoutUserNameResponse.body.errors[0].should.containEql({
+				keyword: 'required',
+				message: 'should have required property \'username\'',
+				params: {
+					missingProperty: 'username'
 				}
 			});
 
@@ -91,7 +92,7 @@ describe('/users', function () {
 			createUserEmptyStringUsernameResponse.body.should.be.equal({
 				error: {
 					username: {
-						regex: '^\w{5,255}$'
+						regex: '\w{4,255}'
 					}
 				}
 			});
@@ -103,11 +104,12 @@ describe('/users', function () {
 				});
 
 			createUserInvalidCharactersInUsernameResponse.statusCode.should.be.equal(400);
-			createUserInvalidCharactersInUsernameResponse.body.should.be.equal({
-				error: {
-					username: {
-						regex: '^\w{5,255}$'
-					}
+			createUserInvalidCharactersInUsernameResponse.body.error.should.be.equal('invalid_input');
+			createUserInvalidCharactersInUsernameResponse.body.errors.should.containEql({
+				dataPath: '.password',
+				message: 'should NOT be shorter than 6 characters',
+				params: {
+					limit: 6
 				}
 			});
 		});
@@ -124,7 +126,7 @@ describe('/users', function () {
 				});
 		});
 
-		it('should create session', async function () {
+		it('should return Access-Token', async function () {
 			const agent = supertest(app);
 
 			const signInResponse = await agent.post('/api/users/signin')
