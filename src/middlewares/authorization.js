@@ -1,18 +1,17 @@
-import token from 'token';
+import {verify} from 'token';
 
 export default function(req, res, next) {
 	const authorizationToken = req.get('Authorization');
-
 	if (authorizationToken) {
 		try {
-			const payload = token.verify(authorizationToken);
-			req.user = payload.user;
+			const payload = verify(authorizationToken);
+			req.username = payload.username;
 			next();
 		} catch (error) {
 			next(error); // @TODO
 		}
 	} else {
-		req.user = null;
+		req.username = null;
 		next();
 	}
 }

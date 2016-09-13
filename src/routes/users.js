@@ -35,7 +35,7 @@ users.post('/signup',
 			properties: {
 				username: {
 					type: 'string',
-					pattern: '\\w{4,255}'
+					pattern: '^\\w{4,255}$'
 				},
 				password: {
 					type: 'string',
@@ -73,6 +73,63 @@ users.post('/signup',
 				throw error;
 			}
 		}
+	})
+);
+
+users.post('/signin',
+	validate({
+		body: {
+			required: ['username', 'password'],
+			properties: {
+				username: {
+					type: 'string',
+					pattern: '^\\w{4,255}$'
+				},
+				password: {
+					type: 'string',
+					minLength: 6
+				}
+			}
+		}
+	}),
+	wrap(async function(req, res) {
+		const user = await User.findOne({
+			where: {
+				username: req.body.username
+			}
+		});
+
+		if (user && await user.verifyPassword(req.body.password)) {
+			const accessToken = signToken({
+				username: user.username
+			});
+
+			res.status(200).json({
+				accessToken, user
+			});
+		} else {
+			throw new HttpError(400, 'user_not_found');
+		}
+	})
+);
+
+users.get('/me',
+	wrap(async function(req, res) {
+		if (!req.username) {
+			throw new HttpError(403, 'access_denied');
+		}
+
+		const user = await User.findOne({
+			where: {
+				username: req.username
+			}
+		});
+
+		if (!user) {
+			throw new HttpError(403, 'access_denied');
+		}
+
+		res.status(200).json({user});
 	})
 );
 

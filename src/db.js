@@ -1,7 +1,10 @@
 import Sequelize from 'sequelize';
 import bcrypt from 'bcrypt-as-promised';
+import config from 'config';
 
-const db = new Sequelize('astrack', 'postgres', '', {
+const dbConf = config.get('db');
+
+const db = new Sequelize(dbConf.name, 'postgres', '', {
 	host: 'localhost',
 	dialect: 'postgres',
 

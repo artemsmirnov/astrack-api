@@ -102,19 +102,6 @@ paths:
                                 username: fubar
                 '404':
                     $ref: '#/responses/NotFound'
-    /users/signout:
-        post:
-            tags: [user]
-            summary: Sign out
-            operationId: userSignOut
-            security:
-              - accessToken: []
-            responses:
-                '200':
-                    description: 'Signed out'
-                    examples:
-                        application/json:
-
     /users/me:
         get:
             tags: [user]

@@ -89,11 +89,13 @@ describe('/users', function () {
 				});
 
 			createUserEmptyStringUsernameResponse.statusCode.should.be.equal(400);
-			createUserEmptyStringUsernameResponse.body.should.be.equal({
-				error: {
-					username: {
-						regex: '\w{4,255}'
-					}
+			createUserEmptyStringUsernameResponse.body.error.should.be.equal('invalid_input');
+			createUserEmptyStringUsernameResponse.body.errors[0].should.containEql({
+				dataPath: '.username',
+				keyword: 'pattern',
+				message: 'should match pattern "^\\w{4,255}$"',
+				params: {
+					pattern: '^\\w{4,255}$'
 				}
 			});
 
@@ -103,13 +105,15 @@ describe('/users', function () {
 					password: '2qc5234134f'
 				});
 
+			
 			createUserInvalidCharactersInUsernameResponse.statusCode.should.be.equal(400);
 			createUserInvalidCharactersInUsernameResponse.body.error.should.be.equal('invalid_input');
-			createUserInvalidCharactersInUsernameResponse.body.errors.should.containEql({
-				dataPath: '.password',
-				message: 'should NOT be shorter than 6 characters',
+			createUserInvalidCharactersInUsernameResponse.body.errors[0].should.containEql({
+				dataPath: '.username',
+				keyword: 'pattern',
+				message: 'should match pattern "^\\w{4,255}$"',
 				params: {
-					limit: 6
+					pattern: '^\\w{4,255}$'
 				}
 			});
 		});
@@ -168,8 +172,13 @@ describe('/users', function () {
 				});
 
 			signInResponse.statusCode.should.be.equal(400);
-			signInResponse.body.should.be.eql({
-				error: 'user_not_found'
+			signInResponse.body.error.should.be.equal('invalid_input');
+			signInResponse.body.errors[0].should.containEql({
+				keyword: 'required',
+				message: 'should have required property \'username\'',
+				params: {
+					missingProperty: 'username'
+				}
 			});
 		});
 
@@ -185,44 +194,6 @@ describe('/users', function () {
 			signInResponse.statusCode.should.be.equal(400);
 			signInResponse.body.should.be.eql({
 				error: 'user_not_found'
-			});
-		});
-	});
-
-	describe('POST /signout', function() {
-		beforeEach('create user', async function() {
-			const agent = supertest(app);
-
-			await agent.post('/api/users/signup')
-				.send({
-					username: 'test',
-					password: '123123123'
-				});
-		});
-
-		it('should sign out if user signed in', async function() {
-			const agent = supertest(app);
-
-			const signInResponse = await agent.post('/api/users/signin')
-				.send({
-					username: 'test',
-					password: '123123123'
-				});
-
-			const signOutResponse = await agent.post('/api/users/signout')
-				.set('Access-Token', signInResponse.body.accessToken);
-
-			signOutResponse.statusCode.should.be.equal(200);
-		});
-
-		it('should return error if user not signed in', async function() {
-			const agent = supertest(app);
-
-			const signOutResponse = await agent.post('/api/users/signout');
-
-			signOutResponse.statusCode.should.be.equal(403);
-			signOutResponse.body.should.be.eql({
-				error: 'access_denied'
 			});
 		});
 	});
@@ -248,7 +219,7 @@ describe('/users', function () {
 				});
 
 			const getMeResponse = await agent.get('/api/users/me')
-				.set('Access-Token', signInResponse.body.accessToken);
+				.set('Authorization', signInResponse.body.accessToken);
 
 			getMeResponse.statusCode.should.be.equal(200);
 			getMeResponse.body.should.be.eql({

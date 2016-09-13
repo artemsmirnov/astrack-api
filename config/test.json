@@ -1,4 +1,6 @@
 {
-    "mongodb": "mongodb://localhost/astrack-test",
+    "db": {
+    	"name": "astrack-test"
+    },
     "port": 3400
 }
