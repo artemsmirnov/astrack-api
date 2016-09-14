@@ -37,7 +37,7 @@ describe('/users', function () {
 
 			const createCollisionUserResponse = await agent.post('/api/users/signup')
 				.send({
-					username: 'test',
+					username: 'Test',
 					password: 'gw45g4v5v05'
 				});
 
