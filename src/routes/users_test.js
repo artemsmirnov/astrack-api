@@ -37,7 +37,7 @@ describe('/users', function () {
 
 			const createCollisionUserResponse = await agent.post('/api/users/signup')
 				.send({
-					username: 'test',
+					username: 'Test',
 					password: 'gw45g4v5v05'
 				});
 
@@ -136,6 +136,24 @@ describe('/users', function () {
 			const signInResponse = await agent.post('/api/users/signin')
 				.send({
 					username: 'test',
+					password: '123123123'
+				});
+
+			signInResponse.statusCode.should.be.equal(200);
+			signInResponse.body.should.have.property('accessToken');
+			signInResponse.body.should.containEql({
+				user: {
+					username: 'test'
+				}
+			});
+		});
+
+		it('should let signin with token in other case', async function () {
+			const agent = supertest(app);
+
+			const signInResponse = await agent.post('/api/users/signin')
+				.send({
+					username: 'TeST',
 					password: '123123123'
 				});
 
