@@ -7,7 +7,7 @@ const dbConf = config.get('db');
 const db = new Sequelize(dbConf.name, 'postgres', '', {
 	host: 'localhost',
 	dialect: 'postgres',
-
+	logging: false,
 	pool: {
 		max: 5,
 		min: 0,
