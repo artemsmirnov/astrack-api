@@ -4,27 +4,7 @@ import { sign as signToken } from 'token';
 import { wrap } from './utils';
 import { HttpError } from 'HttpError';
 import _ from 'lodash';
-import Ajv from 'ajv';
-
-function validate(schema) {
-	const ajv = new Ajv({allErrors: true});
-	const validator = ajv.compile(schema.body);
-
-	return function(req, res, next) {
-		try {
-			const valid = validator(req.body);
-			const errors = validator.errors;
-			
-			if (valid) {
-				next();
-			} else {
-				next(new HttpError(400, 'invalid_input', {errors}))
-			}
-		} catch (err) {
-			next(err);
-		}
-	}
-}
+import validate from 'middlewares/validate';
 
 const users = Router();
 

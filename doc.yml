@@ -283,7 +283,7 @@ responses:
                 errors:
                   - dataPath: '.username'
                     keyword: 'pattern'
-                    message: 'should match pattern "^\\w{4,255}$"',
+                    message: 'should match pattern "^\\w{4,255}$"'
                     params:
                         pattern: '^\\w{4,255}$'
 
@@ -326,4 +326,4 @@ definitions:
             errors:
                 type: array
                 items:
-                    type: object
+                    type: object`

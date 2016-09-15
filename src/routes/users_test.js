@@ -6,7 +6,7 @@ import app from 'app';
 before(app.resolveWhenReady);
 beforeEach(clearDb);
 
-describe('/users', function () {
+describe('api /users', function () {
 	describe('POST /signup', function () {
 		it('should create user and return it', async function () {
 			const agent = supertest(app);
@@ -47,6 +47,7 @@ describe('/users', function () {
 			});
 		});
 
+		// @TODO move it to unit test
 		it('should return bad request on data is invalid', async function() {
 			const agent = supertest(app);
 
@@ -181,25 +182,6 @@ describe('/users', function () {
 			});
 		});
 
-		it('should return error when username is not provided', async function () {
-			const agent = supertest(app);
-
-			const signInResponse = await agent.post('/api/users/signin')
-				.send({
-					password: '000000'
-				});
-
-			signInResponse.statusCode.should.be.equal(400);
-			signInResponse.body.error.should.be.equal('invalid_input');
-			signInResponse.body.errors[0].should.containEql({
-				keyword: 'required',
-				message: 'should have required property \'username\'',
-				params: {
-					missingProperty: 'username'
-				}
-			});
-		});
-
 		it('should return error when user not found', async function () {
 			const agent = supertest(app);
 
@@ -247,7 +229,7 @@ describe('/users', function () {
 			});
 		});
 
-		it('should return null when client is not logged in', async function () {
+		it('should send error if client is not logged in', async function () {
 			const agent = supertest(app);
 
 			const getMeResponse = await agent.get('/api/users/me');
