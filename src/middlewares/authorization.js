@@ -1,6 +1,6 @@
 import {verify} from 'token';
 
-export default function(req, res, next) {
+export default async function(req, res, next) {
 	const authorizationToken = req.get('Authorization');
 	if (authorizationToken) {
 		try {

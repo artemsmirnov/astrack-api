@@ -7,6 +7,7 @@ export default function(err, req, res, next) {
 			error: err.message
 		});
 	} else {
+	console.log(err)
 		next(err);
 	}
 }

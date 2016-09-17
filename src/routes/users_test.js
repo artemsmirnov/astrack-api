@@ -137,7 +137,7 @@ describe('api /users', function () {
 				});
 		});
 
-		it('should return user when client is logged in', async function () {
+		it('should send user', async function () {
 			const agent = supertest(app);
 
 			const signInResponse = await agent.post('/api/users/signin')
@@ -154,17 +154,6 @@ describe('api /users', function () {
 				user: {
 					username: 'test'
 				}
-			});
-		});
-
-		it('should send error if client is not logged in', async function () {
-			const agent = supertest(app);
-
-			const getMeResponse = await agent.get('/api/users/me');
-
-			getMeResponse.statusCode.should.be.equal(403);
-			getMeResponse.body.should.be.eql({
-				error: 'access_denied'
 			});
 		});
 	});

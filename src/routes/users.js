@@ -4,6 +4,7 @@ import { sign as signToken } from 'token';
 import { wrap } from './utils';
 import { HttpError } from 'HttpError';
 import _ from 'lodash';
+import authorizedOnly from 'middlewares/authorizedOnly';
 import validate from 'middlewares/validate';
 
 const users = Router();
@@ -93,23 +94,14 @@ users.post('/signin',
 	})
 );
 
+users.use(authorizedOnly);
+
 users.get('/me',
+	authorizedOnly,
 	wrap(async function(req, res) {
-		if (!req.username) {
-			throw new HttpError(403, 'access_denied');
-		}
-
-		const user = await User.findOne({
-			where: {
-				username: req.username
-			}
+		res.status(200).json({
+			user: req.user
 		});
-
-		if (!user) {
-			throw new HttpError(403, 'access_denied');
-		}
-
-		res.status(200).json({user});
 	})
 );
 

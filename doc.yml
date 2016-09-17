@@ -169,7 +169,8 @@ paths:
                     example:
                         name: 'PR-1'
             responses:
-                '200':
+                '201':
+                    description: 'Created'
                     schema:
                         type: object
                         properties:
