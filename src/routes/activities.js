@@ -84,7 +84,7 @@ activities.post('/:activityId/logs',
 		}
 	}),
 	wrap(async function(req, res) {
-		const activity = await Activity.findOne({
+		const activity = await Activity.scope('includeLogs').findOne({
 			where: {
 				id: req.params.activityId,
 				userUsername: req.username
@@ -101,17 +101,42 @@ activities.post('/:activityId/logs',
 			duration: req.body.duration
 		});
 
-		const updatedActivity = await Activity.scope('includeLogs').findOne({
-			where: {
-				id: req.params.activityId,
-				userUsername: req.username
-			}
-		});
+		await activity.reload();
 
-		res.status(201).json({
-			activity: updatedActivity
-		});
+		res.status(201).json({ activity	});
 	})
 );
+
+activities.delete('/:activityId/logs/:logId',
+	wrap(async function(req, res) {
+		const log = await Log.findOne({
+			where: {
+				id: req.params.logId,
+				activityId: req.params.activityId
+			},
+			include: [
+				{
+					model: Activity,
+					where: {
+						userUsername: req.username
+					}
+				}
+			]
+		});
+
+		if (!log) {
+			throw new HttpError(403, 'access_denied');
+		}
+
+		await log.destroy();
+
+		const activity = await Activity.scope('includeLogs').findOne({
+			activityId: req.params.activityId,
+			username: req.username
+		});
+
+		res.status(200).json({activity});
+	})
+)
 
 export default activities;
