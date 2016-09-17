@@ -53,9 +53,18 @@ export const User = db.define('user', {
 export const Activity = db.define('activity', {
 	name: Sequelize.STRING
 }, {
-	timestamps: false
+	timestamps: false,
+	instanceMethods: {
+		toJSON() {
+			const values = this.get({plain: true});
+
+			delete values.userUsername;
+			return values;
+		}
+	}
 });
 
+User.hasMany(Activity);
 Activity.belongsTo(User);
 
 export const Log = db.define('log', {
@@ -66,6 +75,7 @@ export const Log = db.define('log', {
 	timestamps: false
 });
 
+Activity.hasMany(Log);
 Log.belongsTo(Activity);
 
 export function clear() {

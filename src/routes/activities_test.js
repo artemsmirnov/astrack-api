@@ -21,28 +21,28 @@ describe('api /activities', function () {
 			const agent = supertest(app);
 			const accessToken = await signUp('test', '123123');
 
-			await agent.post('/activities')
+			await agent.post('/api/activities')
 				.set('Authorization', accessToken)
 				.send({
 					name: 'PR-1'
 				});
 
-			await agent.post('/activities')
+			await agent.post('/api/activities')
 				.set('Authorization', accessToken)
 				.send({
 					name: 'PR-2'
 				});
 
-			const indexResponse = await agent.get('/activities')
+			const indexResponse = await agent.get('/api/activities')
 				.set('Authorization', accessToken);
 
 			indexResponse.statusCode.should.be.equal(200);
 			indexResponse.body.should.have.property('activities')
-				.should.have.length(2)
-				.should.containDeep([
-					{name: 'PR-1'},
-					{name: 'PR-2'}
-				]);
+			indexResponse.body.activities.should.have.length(2);
+			indexResponse.body.activities.should.containDeep([
+				{name: 'PR-1', logs: []}, //@TODO check logs embeded
+				{name: 'PR-2', logs: []}
+			]);
 		});
 	});
 
@@ -51,16 +51,16 @@ describe('api /activities', function () {
 			const agent = supertest(app);
 			const accessToken = await signUp('test', '123123');
 
-			const createActivityResponse = await agent.post('/activities')
+			const createActivityResponse = await agent.post('/api/activities')
 				.set('Authorization', accessToken)
 				.send({
 					name: 'PR-1'
 				});
 
 			createActivityResponse.statusCode.should.be.equal(201);
-			createActivityResponse.activity.should.have.property('name').equal('PR-1');
-			createActivityResponse.activity.should.have.property('id');
-			createActivityResponse.activity.should.have.property('logs').Array();
+			createActivityResponse.body.activity.should.have.property('name').equal('PR-1');
+			createActivityResponse.body.activity.should.have.property('id').Number();
+			createActivityResponse.body.activity.should.have.property('logs').Array();
 		});
 	});
 
@@ -69,33 +69,33 @@ describe('api /activities', function () {
 			const agent = supertest(app);
 			const accessToken = await signUp('test', '123123');
 
-			const createActivityResponse = await agent.post('/activities')
+			const createActivityResponse = await agent.post('/api/activities')
 				.set('Authorization', accessToken)
 				.send({
 					name: 'PR-1'
 				});
 
-			await agent.post('/activities')
+			await agent.post('/api/activities')
 				.set('Authorization', accessToken)
 				.send({
 					name: 'PR-2'
 				});
 
 			const deleteActivityResponse = await agent
-				.delete(`/activities/${createActivityResponse.body.activity.id}`)
+				.delete(`/api/activities/${createActivityResponse.body.activity.id}`)
 				.set('Authorization', accessToken);
 
 			deleteActivityResponse.statusCode.should.be.equal(200);
 
-			const indexResponse = await agent.get('/activities')
+			const indexResponse = await agent.get('/api/activities')
 				.set('Authorization', accessToken);
 
 			indexResponse.statusCode.should.be.equal(200);
-			indexResponse.body.should.have.property('activities')
-				.should.have.length(1)
-				.should.containDeep([
-					{name: 'PR-2'},
-				]);
+			indexResponse.body.should.have.property('activities');
+			indexResponse.body.activities.should.have.length(1);
+			indexResponse.body.activities.should.containDeep([
+				{name: 'PR-2'}
+			]);
 		});
 
 		it('should respond 403 on attempt to delete other user\'s activity', async function() {
@@ -103,14 +103,14 @@ describe('api /activities', function () {
 			const accessToken = await signUp('test', '123123');
 			const accessToken2 = await signUp('test2', '123123');
 
-			const createActivityResponse = await agent.post('/activities')
+			const createActivityResponse = await agent.post('/api/activities')
 				.set('Authorization', accessToken)
 				.send({
 					name: 'PR-1'
 				});
 			
 			const deleteActivityResponse = await agent
-				.delete(`/activities/${createActivityResponse.body.activity.id}`)
+				.delete(`/api/activities/${createActivityResponse.body.activity.id}`)
 				.set('Authorization', accessToken2);
 
 			deleteActivityResponse.statusCode.should.be.equal(403);
