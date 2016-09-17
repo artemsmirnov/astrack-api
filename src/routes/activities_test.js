@@ -118,8 +118,62 @@ describe('api /activities', function () {
 	});
 
 	describe('POST /{activityId}/logs', function () {
-		it('should create activity log');
-		it('should respond 403 on attempt to create activity log in other user\'s activity');
+		it('should create activity log', async function() {
+			const agent = supertest(app);
+			const accessToken = await signUp('test', '123123');
+
+			const createActivityResponse = await agent.post('/api/activities')
+				.set('Authorization', accessToken)
+				.send({
+					name: 'PR-1'
+				});
+
+			const createLogResponse = await agent
+				.post(`/api/activities/${createActivityResponse.body.activity.id}/logs`)
+				.set('Authorization', accessToken)
+				.send({
+					summary: 'Nil',
+					date: 1000,
+					duration: 100
+				});
+
+			createLogResponse.statusCode.should.be.equal(201);
+			createLogResponse.body.should.containDeep({
+				activity: {
+					name: 'PR-1',
+					logs: [
+						{
+							summary: 'Nil',
+							date: 1000,
+							duration: 100
+						}
+					]
+				}
+			});
+		});
+
+		it('should respond 403 on attempt to create activity log in other user\'s activity', async function() {
+			const agent = supertest(app);
+			const accessToken = await signUp('test', '123123');
+			const accessToken2 = await signUp('test2', '123123');
+
+			const createActivityResponse = await agent.post('/api/activities')
+				.set('Authorization', accessToken)
+				.send({
+					name: 'PR-1'
+				});
+
+			const createLogResponse = await agent
+				.post(`/api/activities/${createActivityResponse.body.activity.id}/logs`)
+				.set('Authorization', accessToken2)
+				.send({
+					summary: 'Nil',
+					date: 1000,
+					duration: 100
+				});
+
+			createLogResponse.statusCode.should.be.equal(403);
+		});
 	});
 
 	describe('DELETE /{activityId}/logs/{activityLogId}', function () {

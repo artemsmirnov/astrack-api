@@ -4,5 +4,5 @@ import winston from 'winston';
 
 const port = config.get('port');
 app.listen(port, () => {
-    winston.info(`astrack listening port ${port}`)
+	winston.info(`astrack listening port ${port}`)
 });

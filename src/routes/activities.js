@@ -12,15 +12,11 @@ activities.use(authorizedOnly);
 
 activities.get('/',
 	wrap(async function(req, res) {
-		const activities = await Activity.findAll({
+		const activities = await Activity.scope('includeLogs').findAll({
 			where: {
 				userUsername: req.username
 			},
-			attributes: ['id', 'name'],
-			include: [{
-				model: Log,
-				attributes: ['id', 'summary', 'date', 'duration']
-			}]
+			attributes: ['id', 'name']
 		});
 
 		res.status(200).json({activities});
@@ -48,7 +44,6 @@ activities.post('/',
 			activity: {
 				...(activity.toJSON()),
 				logs: []
-				// @TODO remove this legwork
 			}
 		});
 	})
@@ -63,11 +58,59 @@ activities.delete('/:activityId',
 			}
 		});
 
-		if (destroyCount) {
-			res.status(200).json({});
-		} else {
+		if (destroyCount === 0) {
 			throw new HttpError(403, 'access_denied');
 		}
+
+		res.status(200).json({});
+	})
+);
+
+activities.post('/:activityId/logs',
+	validate({
+		body: {
+			required: ['date', 'duration'],
+			properties: {
+				summary: {
+					type: 'string'
+				},
+				date: {
+					type: 'number'
+				},
+				duration: {
+					type: 'number'
+				}
+			}
+		}
+	}),
+	wrap(async function(req, res) {
+		const activity = await Activity.findOne({
+			where: {
+				id: req.params.activityId,
+				userUsername: req.username
+			}
+		});
+
+		if (!activity) {
+			throw new HttpError(403, 'access_denied');
+		}
+
+		await activity.createLog({
+			summary: req.body.summary,
+			date: req.body.date,
+			duration: req.body.duration
+		});
+
+		const updatedActivity = await Activity.scope('includeLogs').findOne({
+			where: {
+				id: req.params.activityId,
+				userUsername: req.username
+			}
+		});
+
+		res.status(201).json({
+			activity: updatedActivity
+		});
 	})
 );
 

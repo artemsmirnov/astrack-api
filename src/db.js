@@ -61,6 +61,14 @@ export const Activity = db.define('activity', {
 			delete values.userUsername;
 			return values;
 		}
+	},
+	scopes: {
+		includeLogs: () => ({
+			include: [{
+				model: Log,
+				attributes: ['id', 'summary', 'date', 'duration']
+			}]
+		})
 	}
 });
 
