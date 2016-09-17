@@ -1,11 +1,12 @@
 import { Router } from 'express';
+import { authorizedOnly, validate } from 'middlewares';
+
 import { User } from 'db';
+
 import { sign as signToken } from 'token';
-import { wrap } from './utils';
 import { HttpError } from 'HttpError';
+import { wrap } from './utils';
 import _ from 'lodash';
-import authorizedOnly from 'middlewares/authorizedOnly';
-import validate from 'middlewares/validate';
 
 const users = Router();
 

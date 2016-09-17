@@ -1,8 +1,24 @@
 import { Router } from 'express';
-import authorizedOnly from 'middlewares/authorizedOnly';
+import { authorizedOnly, validate } from 'middlewares';
 
-const tracks = Router();
+import { Activity } from 'db';
 
-tracks.use(authorizedOnly);
+import { wrap } from './utils';
 
-export default tracks;
+const activities = Router();
+
+activities.use(authorizedOnly);
+
+activities.get('/',
+	wrap(async function() {
+
+	})
+);
+
+activities.post('/',
+	wrap(async function(req, res) {
+
+	})
+);
+
+export default activities;

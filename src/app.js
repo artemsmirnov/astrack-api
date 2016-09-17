@@ -1,8 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import routes from 'routes';
-import authorization from 'middlewares/authorization';
-import errorHandler from 'middlewares/errorHandler';
+import { authorization, errorHandler } from 'middlewares';
 import { ready as dbReady } from 'db';
 
 const app = express();
