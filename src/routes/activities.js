@@ -47,7 +47,8 @@ activities.post('/',
 		res.status(201).json({
 			activity: {
 				...(activity.toJSON()),
-				logs: [] //@TODO remove this legwork
+				logs: []
+				// @TODO remove this legwork
 			}
 		});
 	})

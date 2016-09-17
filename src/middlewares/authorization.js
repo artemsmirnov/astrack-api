@@ -1,4 +1,5 @@
 import {verify} from 'token';
+import HttpError from 'HttpError';
 
 export default async function(req, res, next) {
 	const authorizationToken = req.get('Authorization');
@@ -8,7 +9,7 @@ export default async function(req, res, next) {
 			req.username = payload.username;
 			next();
 		} catch (error) {
-			next(error); // @TODO
+			throw new HttpError(400, 'invalid_token');
 		}
 	} else {
 		req.username = null;
