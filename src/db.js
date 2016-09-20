@@ -87,19 +87,15 @@ Activity.hasMany(Log);
 Log.belongsTo(Activity);
 
 export function clear() {
-	return db.sync({force: true});
+	return db.sync({
+		match: /test$/,
+		force: true
+	});
 }
 
-// Check connection
-export const ready = db.authenticate()
-	.then(function() {
- 		console.log('Connection has been established successfully.');
+export function bootstrap() {
+	// @TODO add confirmation
+	return db.sync();
+}
 
- 		return db.sync({force: true});
-	})
-	.then(function() {
-		console.log('Models synced');
-	})
-	.catch(function (err) {
-		console.log('Unable to connect to the database:', err);
-	});
+export const ready = db.authenticate();
