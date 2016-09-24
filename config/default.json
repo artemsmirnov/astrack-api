@@ -1,6 +1,9 @@
 {
 	"db": {
-		"name": "astrack"
+		"name": "astrack",
+		"host": "localhost",
+		"username": "postgres",
+		"password": ""
 	},
     "port": 3400,
     "jwt": {

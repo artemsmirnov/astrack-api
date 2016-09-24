@@ -12,4 +12,4 @@ RUN npm install
 
 EXPOSE 3400
 
-CMD [ "npm", "run", "start:forever" ]
+CMD [ "npm", "start" ]

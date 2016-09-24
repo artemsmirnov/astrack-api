@@ -4,8 +4,8 @@ import config from 'config';
 
 const dbConf = config.get('db');
 
-const db = new Sequelize(dbConf.name, 'postgres', '', {
-	host: 'localhost',
+const db = new Sequelize(dbConf.name, dbConf.username, dbConf.password, {
+	host: dbConf.host,
 	dialect: 'postgres',
 	logging: false,
 	pool: {

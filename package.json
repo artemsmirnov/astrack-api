@@ -45,7 +45,7 @@
     "start": "node -r babel-register src/server.js",
     "start:forever": "forever start server.js",
     "docker:build": "docker build -t artyom/astrack-api .",
-    "docker:run": "docker run -p 3400:3400 -d artyom/astrack-api",
+    "docker:run": "docker run -e DB_HOST=database -e DB_PASSWORD=postgres --add-host database:172.17.0.1 --restart on-failure --name astrack-api -p 3400:3400 -d artyom/astrack-api",
     "db:bootstrap": "node -r babel-register scripts/db/bootstrap.js"
   },
   "author": "",
